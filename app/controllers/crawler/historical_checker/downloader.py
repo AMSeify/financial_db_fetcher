@@ -81,6 +81,3 @@ async def DownloadMissing():
 
     update_is_checked_to_true(db)
 
-
-asyncio.run(fetch_daily_data())
-asyncio.run(DownloadMissing())
