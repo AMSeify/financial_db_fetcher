@@ -28,7 +28,7 @@ async def run_daily_task_loop():
     while True:
         now = datetime.now()
         start_time = time(8, 57)
-        end_time = time(12, 35)
+        end_time = time(13, 35)
 
         if start_time <= now.time() <= end_time:
             await run_daily_task()
@@ -49,7 +49,7 @@ async def run_daily_task_loop():
 async def run_weekly_task_loop():
     while True:
         now = datetime.now()
-        if now.weekday() >= 4: #and now.time() >= time(20, 0):
+        if now.weekday() == 4: #and now.time() >= time(20, 0):
             await fetch_daily_data()
             await DownloadMissing()
             weekly_task_logger.info("DownloadMissing executed successfully.")
