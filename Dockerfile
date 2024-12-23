@@ -1,12 +1,13 @@
-# Start from a lightweight Python base image
-FROM python:3.12-slim
+FROM python:3.11-slim
 
-# Set the working directory in the container
-WORKDIR /app
+WORKDIR /src
 
-# Copy the requirements file and install dependencies
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+COPY app /src/app
+COPY config /src/config
+COPY main.py /src/
+
+# Copy the requirements file into the container
+COPY requirements.txt /requirements.txt
 
 # Install system dependencies and Microsoft ODBC driver
 RUN apt-get update && apt-get install -y \
@@ -20,16 +21,13 @@ RUN apt-get update && apt-get install -y \
     && apt-get update \
     && ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18 unixodbc-dev \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install  -r /requirements.txt
+
+RUN pwd && ls
 
 # Add the SQL tools to PATH
 ENV PATH="/opt/mssql-tools18/bin:${PATH}"
 
-# Copy the rest of the application code
-COPY . /app/
 
-# Set environment variables if needed
-# ENV SOME_ENV_VAR=some_value
-
-# Run the main async tasks
 CMD ["python", "main.py"]
