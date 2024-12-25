@@ -1,0 +1,27 @@
+services:
+    bourseview-data-fetecher:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: 172.16.2.32:8085/bourseview/data-fetecher:dev
+        container_name: bourseview-data-fetecher
+
+        restart: always
+        environment: 
+            - FINANCIAL_DB_SERVER=172.16.2.34
+            - FINANCIAL_DB_DATABASE=FinancialDB
+            - FINANCIAL_DB_USER=sa
+            - FINANCIAL_DB_PASSWORD=1gVGvx88N5Os
+            - FINANCIAL_DB_DRIVER=/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.4.so.1.1
+            - FINANCIAL_DB_TRUST_CERTIFICATE=YES
+            - CODAL_DB_SERVER=172.16.2.34
+            - CODAL_DB_DATABASE=CodalDB
+            - CODAL_DB_USER=sa
+            - CODAL_DB_PASSWORD=1gVGvx88N5Os
+            - CODAL_DB_DRIVER=/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.4.so.1.1
+            - CODAL_DB_TRUST_CERTIFICATE=YES
+
+networks:
+    default:
+        external: true
+        name: main
