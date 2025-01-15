@@ -1,9 +1,12 @@
 import os
+
+from bleach.six_shim import urllib
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 from dotenv import load_dotenv
+import urllib
 
 
 # Load environment variables
@@ -15,7 +18,7 @@ BaseCodalDB = declarative_base()
 
 # FinancialDB configurations
 financial_db_url = (
-    f"mssql+pyodbc://{os.getenv('FINANCIAL_DB_USER')}:{os.getenv('FINANCIAL_DB_PASSWORD')}"
+    f"mssql+pyodbc://{os.getenv('FINANCIAL_DB_USER')}:{urllib.parse.quote(os.getenv('FINANCIAL_DB_PASSWORD'))}"
     f"@{os.getenv('FINANCIAL_DB_SERVER')}/{os.getenv('FINANCIAL_DB_DATABASE')}"
     f"?driver={os.getenv('FINANCIAL_DB_DRIVER')}"
     f"&TrustServerCertificate={os.getenv('FINANCIAL_DB_TRUST_CERTIFICATE')}"
@@ -23,7 +26,7 @@ financial_db_url = (
 
 # CodalDB configurations
 codal_db_url = (
-    f"mssql+pyodbc://{os.getenv('CODAL_DB_USER')}:{os.getenv('CODAL_DB_PASSWORD')}"
+    f"mssql+pyodbc://{os.getenv('CODAL_DB_USER')}:{urllib.parse.quote(os.getenv('CODAL_DB_PASSWORD'))}"
     f"@{os.getenv('CODAL_DB_SERVER')}/{os.getenv('CODAL_DB_DATABASE')}"
     f"?driver={os.getenv('CODAL_DB_DRIVER')}"
     f"&TrustServerCertificate={os.getenv('CODAL_DB_TRUST_CERTIFICATE')}"

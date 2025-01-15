@@ -23,8 +23,8 @@ def update_is_checked_to_true(db):
 
 async def DownloadMissing():
     db = FinancialSessionLocal()
-    companies = get_all(db , Company , as_dataframe=True)
-    await updateOCLHSummery()
+    companies = get_all(db , Company , as_dataframe=True)#[537:]
+    # await updateOCLHSummery()
 
     for _ , row in companies.iterrows():
 
@@ -81,3 +81,6 @@ async def DownloadMissing():
 
     update_is_checked_to_true(db)
 
+
+
+# asyncio.run(DownloadMissing())
