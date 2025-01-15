@@ -78,7 +78,7 @@ async def process_batch(batch, db, start_of_day, end_of_day):
         print(f"Inserted {len(not_in_results)} new rows into OBHistory.")
 
 
-async def set_rt_data(batch_size=50):
+async def set_rt_data(batch_size=500):
     db = FinancialSessionLocal()
     companies = get_all(db, Company, as_dataframe=True)[:30]
 
@@ -96,7 +96,7 @@ async def set_rt_data(batch_size=50):
     print("All batches processed.")
 
 
-async def main():
-    await set_rt_data(batch_size=500)  # Adjust batch size as needed
+# async def main():
+#     await set_rt_data(batch_size=500)  # Adjust batch size as needed
 
 # asyncio.run(main())
