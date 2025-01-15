@@ -33,7 +33,7 @@ async def fetch(url: str, params: Dict[str, str] = None) -> Dict[str, Any]:
 def _fetch(url: str, params: Dict[str, str] = None) -> Dict[str, Any]:
     """Fetch data with exponential backoff and infinite retries, also extract group ID."""
     retries = 0
-    while True:
+    while retries < MAX_RETRIES:
         try:
             response = http.request('GET', url, headers=headers, fields=params, timeout=5)
             if response.status >= 400:
@@ -92,7 +92,7 @@ def _fetch_js_variables(url: str) -> Dict[str, Any]:
     :return: A dictionary containing the 'ClosingPriceData' and 'BestLimitData'.
     """
     retries = 0
-    while True:
+    while retries < MAX_RETRIES:
         try:
             # Make the HTTP request
             response = http.request('GET', url, headers=headers, timeout=5)
@@ -108,41 +108,41 @@ def _fetch_js_variables(url: str) -> Dict[str, Any]:
             # Find the script tag that contains the JavaScript data
             script_tags = soup.find_all('script')
 
-            # Initialize variables to store extracted data
-            closing_price_data = None
-            best_limit_data = None
-
             # Regular expressions to match the desired JavaScript variables
             closing_price_pattern = re.compile(r"var ClosingPriceData=\[(.*?)\];", re.DOTALL)
             best_limit_pattern = re.compile(r"var BestLimitData=\[(.*?)\];", re.DOTALL)
 
-            # Iterate over script tags to find the JavaScript variables
-            for script in script_tags:
-                script_content = script.string
-                if script_content:
-                    # Extract 'ClosingPriceData'
-                    closing_price_match = re.search(closing_price_pattern, script_content)
-                    if closing_price_match:
-                        closing_price_data = eval(f"[{closing_price_match.group(1)}]")
+            # Extract data using list comprehensions and regex
+            closing_price_data = [
+                eval(f"[{match.group(1)}]")
+                for script in script_tags if script.string
+                for match in [re.search(closing_price_pattern, script.string)]
+                if match
+            ]
 
-                    # Extract 'BestLimitData'
-                    best_limit_match = re.search(best_limit_pattern, script_content)
-                    if best_limit_match:
-                        best_limit_data = eval(f"[{best_limit_match.group(1)}]")
+            best_limit_data = [
+                eval(f"[{match.group(1)}]")
+                for script in script_tags if script.string
+                for match in [re.search(best_limit_pattern, script.string)]
+                if match
+            ]
 
             # If both variables are successfully extracted, return them
             if closing_price_data or best_limit_data:
                 return {
-                    "ClosingPriceData": closing_price_data,
-                    "BestLimitData": best_limit_data
+                    "ClosingPriceData": closing_price_data[0] if closing_price_data else None,
+                    "BestLimitData": best_limit_data[0] if best_limit_data else None
                 }
 
         except Exception as e:
             retries += 1
             print(f"Error fetching {url}: {str(e)}, retrying... (attempt {retries})")
-            sleep_time = 1 + random.uniform(0, 1)
+            sleep_time = RETRY_DELAY * (BACKOFF_FACTOR ** retries) + random.uniform(0, 1)
             print(f"Sleeping for {sleep_time} seconds before retrying...")
             time.sleep(sleep_time)
+
+    print(f"Max retries reached for {url}. Skipping...")
+    return {}
 
 async def fetch_js_variables(url: str) -> Dict[str, Any]:
     """

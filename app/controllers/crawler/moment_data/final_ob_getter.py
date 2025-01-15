@@ -26,7 +26,7 @@ async def process_batch(batch, db, start_of_day, end_of_day):
     final[["Final", "close", "count", "volume", "MarketCap"]] = final[["Final", "close", "count", "volume", "MarketCap"]].astype(int)
 
     # condition = FinalMoment.datetime.between(start_of_day, end_of_day)
-    existing_results = get_by_condition(db, FinalMoment, text(f"DateOnly = '{start_of_day}'"), as_dataframe=True)
+    existing_results = get_by_condition(db, FinalMoment, text(f"datetime > '{start_of_day}'"), as_dataframe=True)
 
     if not existing_results.empty:
         existing_results = existing_results[columns]
@@ -81,7 +81,7 @@ async def process_batch(batch, db, start_of_day, end_of_day):
         print(f"Inserted {len(not_in_results)} new rows into OBHistory.")
 
 
-async def set_rt_data(batch_size=300):
+async def set_rt_data(batch_size=800):
     db = FinancialSessionLocal()
     companies = get_all(db, Company, as_dataframe=True)
 

@@ -35,8 +35,3 @@ async def updateOCLHSummery():
     db = FinancialSessionLocal()
     DataStatus.populate_data_status(db)
     db.close()  # Close the database session
-
-# async def main():
-#     await fetch_daily_data()
-
-# asyncio.run(main())

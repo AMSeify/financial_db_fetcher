@@ -1,9 +1,8 @@
 import pandas as pd
 from tqdm.asyncio import tqdm_asyncio
 from jdatetime import date as jdate
-import asyncio
-import swifter
 from tqdm import tqdm
+import swifter
 from app.controllers.crawler.aiohttp_getter.aio_fetcher import time_series_to_df
 from app.controllers.tools.date_tools import api_date_converter
 from app.models.financial_db import DailyPrice
