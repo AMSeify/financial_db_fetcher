@@ -43,6 +43,7 @@ async def DownloadMissing():
             print(f"inserting {len(insert_data)} records for {row.ticker}")
             try:
                 df_bulk_insert(db , FinalMoment , insert_data)
+
             except Exception as e:
                 print(f"Failed to insert records: {e}")
             del final_df , insert_data

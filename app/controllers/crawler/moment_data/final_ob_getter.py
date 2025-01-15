@@ -1,3 +1,5 @@
+from sqlalchemy import text
+
 from app.controllers.crawler.aiohttp_getter.aio_fetcher import time_series_to_df
 from app.controllers.crawler.moment_data.js_getter import get_realtime_final_price_and_ob
 from app.models.financial_db import FinalMoment, Company, OBHistory, OHLC_Summary
@@ -23,8 +25,8 @@ async def process_batch(batch, db, start_of_day, end_of_day):
     final = final[columns].copy()
     final[["Final", "close", "count", "volume", "MarketCap"]] = final[["Final", "close", "count", "volume", "MarketCap"]].astype(int)
 
-    condition = FinalMoment.datetime.between(start_of_day, end_of_day)
-    existing_results = get_by_condition(db, FinalMoment, condition, as_dataframe=True)
+    # condition = FinalMoment.datetime.between(start_of_day, end_of_day)
+    existing_results = get_by_condition(db, FinalMoment, text(f"DateOnly = '{start_of_day}'"), as_dataframe=True)
 
     if not existing_results.empty:
         existing_results = existing_results[columns]
@@ -43,6 +45,7 @@ async def process_batch(batch, db, start_of_day, end_of_day):
 
     if not not_in_results.empty:
         df_bulk_insert(db, FinalMoment, not_in_results)
+        updateOCLH(db)
         print(f"Inserted {len(not_in_results)} new rows into FinalMoment.")
 
     # Process `orderbook` data
@@ -54,8 +57,8 @@ async def process_batch(batch, db, start_of_day, end_of_day):
     orderbook[["Depth", "Sell_No", "Sell_Vol", "Sell_Price", "Buy_No", "Buy_Vol", "Buy_Price"]] = orderbook[
         ["Depth", "Sell_No", "Sell_Vol", "Sell_Price", "Buy_No", "Buy_Vol", "Buy_Price"]].astype(int)
 
-    condition = OBHistory.datetime.between(start_of_day, end_of_day)
-    existing_orderbook = get_by_condition(db, OBHistory, condition, as_dataframe=True)
+    # condition = OBHistory.datetime.between(start_of_day, end_of_day)
+    existing_orderbook = get_by_condition(db, OBHistory, text(f"datetime > '{start_of_day}'"), as_dataframe=True)
 
     if not existing_orderbook.empty:
         existing_orderbook = existing_orderbook[columns]
@@ -78,9 +81,9 @@ async def process_batch(batch, db, start_of_day, end_of_day):
         print(f"Inserted {len(not_in_results)} new rows into OBHistory.")
 
 
-async def set_rt_data(batch_size=500):
+async def set_rt_data(batch_size=300):
     db = FinancialSessionLocal()
-    companies = get_all(db, Company, as_dataframe=True)[:30]
+    companies = get_all(db, Company, as_dataframe=True)
 
     start_of_day = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
     end_of_day = start_of_day + timedelta(days=1)
